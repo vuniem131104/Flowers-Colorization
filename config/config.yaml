@@ -1,0 +1,24 @@
+artifact_root: artifacts 
+
+data_ingestion:
+  root_dir: artifacts/data_ingestion
+  local_file: /home/vuiem/.cache/kagglehub/datasets/imsparsh/flowers-dataset/versions/2
+  dataset_name: imsparsh/flowers-dataset
+  local_dataset_dir: artifacts/data_ingestion/flowers-dataset
+
+data_transformation:
+  root_dir: artifacts/data_transformation
+  data_dir: artifacts/data_ingestion/flowers-dataset
+  train_data_dir: artifacts/data_transformation/train
+  test_data_dir: artifacts/data_transformation/test
+
+model_trainer:
+  root_dir: artifacts/model_trainer
+  train_data_file: artifacts/data_transformation/train.csv
+  model_path: artifacts/model_trainer/model.pkl
+
+model_evaluation:
+  root_dir: artifacts/model_evaluation
+  test_data_file: artifacts/data_transformation/test.csv
+  model_path: artifacts/model_trainer/model.pkl
+  result_file: artifacts/model_evaluation/result.json
