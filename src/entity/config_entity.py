@@ -31,3 +31,7 @@ class ModelEvaluationConfig:
     model_path: str 
     result_file: str 
     
+@dataclass
+class TEST:
+    root_dir: str
+    
