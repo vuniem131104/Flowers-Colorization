@@ -7,6 +7,8 @@ from box import ConfigBox
 from pathlib import Path
 from typing import Any
 from box.exceptions import BoxValueError
+from torch import nn 
+import torch 
 
 
 @ensure_annotations
@@ -101,3 +103,45 @@ def load_bin(path: Path) -> Any:
     data = joblib.load(path)
     print(f"binary file loaded from: {path}")
     return data
+
+class LinearScheduler:
+    def __init__(self, beta_start, beta_end, steps):
+        self.beta_start = beta_start
+        self.beta_end = beta_end
+        self.steps = steps 
+        self.betas = torch.linspace(beta_start, beta_end, steps)
+        self.alphas = 1 - self.betas
+        self.alphas_cumprod = torch.cumprod(self.alphas, dim=0)
+        self.sqrt_alphas_cumprod = torch.sqrt(self.alphas_cumprod)
+        self.sqrt_one_minus_alphas_cumprod = torch.sqrt(1 - self.alphas_cumprod)
+        
+    def add_noise(self, original, noise, t):
+        original_shape = original.shape
+        batch_size = original_shape[0] 
+
+        sqrt_alphas_cumprod = self.sqrt_alphas_cumprod[t].to(original.device).reshape(batch_size, 1, 1, 1)
+        sqrt_one_minus_alphas_cumprod = self.sqrt_one_minus_alphas_cumprod[t].to(original.device).reshape(batch_size, 1, 1, 1)
+
+        return sqrt_alphas_cumprod * original + sqrt_one_minus_alphas_cumprod * noise
+
+    def sample_prev_sample(self, xt, t, noise_pred):
+        x0 = (xt - self.sqrt_one_minus_alphas_cumprod.to(xt.device)[t] * noise_pred) / self.sqrt_alphas_cumprod.to(xt.device)[t] 
+        x0 = torch.clamp(x0, -1, 1)
+        mean = (xt - self.betas.to(xt.device)[t] * noise_pred) / self.sqrt_one_minus_alphas_cumprod.to(xt.device)[t]
+        if t == 0:
+            return mean, x0 
+        else:
+            variance = (1 - self.alphas_cumprod.to(xt.device)[t - 1]) / (1.0 - self.alphas_cumprod.to(xt.device)[t])
+            variance = variance * self.betas.to(xt.device)[t]
+            sigma = variance ** 0.5
+            z = torch.randn(xt.shape).to(xt.device)
+            return mean + sigma * z, x0 
+        
+def remove_module_prefix(state_dict):
+    new_state_dict = {}
+    for k, v in state_dict.items():
+        name = k
+        if name.startswith('module.'):
+            name = name[7:] 
+        new_state_dict[name] = v
+    return new_state_dict

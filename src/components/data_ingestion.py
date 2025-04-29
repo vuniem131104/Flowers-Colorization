@@ -8,6 +8,7 @@ from src.entity.config_entity import DataIngestionConfig
 import kagglehub
 import os 
 import shutil
+from src.config.configuration import ConfigurationManager
 
 class DataIngestion:
 
@@ -15,8 +16,8 @@ class DataIngestion:
         self.config = config
 
     def download_file(self):
-        unzip_dir = self.config.unzip_dir
-        os.makedirs(unzip_dir, exist_ok=True)
+        root_dir = self.config.root_dir
+        os.makedirs(root_dir, exist_ok=True)
         if not os.path.exists(self.config.local_file):
             path = kagglehub.dataset_download(self.config.dataset_name)
             print(f"File downloaded! with following info: \n{path}")
@@ -25,36 +26,33 @@ class DataIngestion:
 
     def move_files(self):
         local_file = self.config.local_file
-        unzip_dir = self.config.unzip_dir
+        root_dir = self.config.root_dir
         for item in os.listdir(local_file):
             s = os.path.join(local_file, item)
-            d = os.path.join(unzip_dir, item)
+            d = os.path.join(root_dir, item)
             shutil.move(s, d)
         print(f"Files moved!!!")
 
     def remove_files(self):
-        unzip_dir = self.config.unzip_dir
-        for item in os.listdir(unzip_dir):
-            if os.path.isfile(os.path.join(unzip_dir, item)):
-                os.remove(os.path.join(unzip_dir, item))
+        root_dir = self.config.root_dir
+        for item in os.listdir(root_dir):
+            if os.path.isfile(os.path.join(root_dir, item)):
+                os.remove(os.path.join(root_dir, item))
         print(f"Files removed!!!")
 
-    # def join_folder_to_dataset(self):
-    #     unzip_dir = self.config.unzip_dir
-    #     for item in os.listdir(unzip_dir):
-    #         if 
-    #     print(f"Folders joined!!!")
-
-    def extract_zip_file(self):
-        unzip_path = self.config.unzip_dir
-        os.makedirs(unzip_path, exist_ok=True)
-        with ZipFile(file=self.config.local_data_file, mode="r") as zip_ref:
-            zip_ref.extractall(path=unzip_path)
-        print(f"Zip file extracted!!!")
-        
-# if __name__ == "__main__":
-#     configmanager = ConfigurationManager()
-#     data_ingestion_config = configmanager.get_data_ingestion_config()
-#     data_ingestion = DataIngestion(config=data_ingestion_config)
-#     data_ingestion.download_file()
-#     data_ingestion.extract_zip_file()
+    def join_folder_to_dataset(self):
+        root_dir = self.config.root_dir
+        local_dataset_dir = self.config.local_dataset_dir
+        if not os.path.exists(local_dataset_dir):
+            os.makedirs(local_dataset_dir, exist_ok=True)
+        for item in os.listdir(root_dir):
+            if item == 'test':
+                for file in os.listdir(os.path.join(root_dir, item)):
+                    shutil.move(os.path.join(root_dir, item, file), os.path.join(local_dataset_dir, file))
+                shutil.rmtree(os.path.join(root_dir, item))
+            elif item == 'train':
+                for subfolder in os.listdir(os.path.join(root_dir, item)):
+                    for file in os.listdir(os.path.join(root_dir, item, subfolder)):
+                        shutil.move(os.path.join(root_dir, item, subfolder, file), os.path.join(local_dataset_dir, file))
+                shutil.rmtree(os.path.join(root_dir, item))
+        print(f"Folders joined!!!")

@@ -11,14 +11,18 @@ data_transformation:
   data_dir: artifacts/data_ingestion/flowers-dataset
   train_data_dir: artifacts/data_transformation/train
   test_data_dir: artifacts/data_transformation/test
+  val_data_dir: artifacts/data_transformation/val
 
 model_trainer:
   root_dir: artifacts/model_trainer
-  train_data_file: artifacts/data_transformation/train.csv
-  model_path: artifacts/model_trainer/model.pkl
+  train_data_dir: artifacts/data_transformation/train
+  val_data_dir: artifacts/data_transformation/val
+  best_model_file: artifacts/model_trainer/model.pth
+  batch_size: 2
+  image_size: 64
 
 model_evaluation:
   root_dir: artifacts/model_evaluation
-  test_data_file: artifacts/data_transformation/test.csv
-  model_path: artifacts/model_trainer/model.pkl
+  best_model_file: artifacts/model_trainer/model.pth
+  test_data_dir: artifacts/data_transformation/test
   result_file: artifacts/model_evaluation/result.json

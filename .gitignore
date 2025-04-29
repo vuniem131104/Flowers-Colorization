@@ -3,3 +3,6 @@ artifacts/
 .env
 test.py 
 test.ipynb
+params.yaml 
+schema.yaml 
+template.py

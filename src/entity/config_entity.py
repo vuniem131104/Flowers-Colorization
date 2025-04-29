@@ -14,24 +14,22 @@ class DataTransformationConfig:
     data_dir: str 
     train_data_dir: str 
     test_data_dir: str 
+    val_data_dir: str
 
 @dataclass
 class ModelTrainerConfig:
     root_dir: str  
-    train_data_file: str 
-    model_name: str 
-    alpha: float 
-    l1_ratio: float 
-    model_path: str 
+    train_data_dir: str 
+    val_data_dir: str 
+    best_model_file: str 
+    batch_size: int
+    image_size: int 
+
 
 @dataclass
 class ModelEvaluationConfig:
     root_dir: str  
-    test_data_file: str 
-    model_path: str 
-    result_file: str 
-    
-@dataclass
-class TEST:
-    root_dir: str
+    best_model_file: str 
+    test_data_dir: str 
+    result_file: str
     
